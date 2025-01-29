@@ -33,10 +33,13 @@ export default function TaskBoard() {
 
   const handleCreateTask = async (taskData) => {
     try {
+      setLoading(true)
       const newTask = await createTask(user.uid, taskData)
-      setTasks([...tasks, newTask])
+      setTasks(prevTasks => [newTask, ...prevTasks])
     } catch (error) {
       console.error('Error creating task:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -73,6 +76,11 @@ export default function TaskBoard() {
     }
   }
 
+  const openEditModal = (task) => {
+    setEditingTask(task)
+    setIsModalOpen(true)
+  }
+
   const columns = [
     { 
       id: 'todo', 
@@ -99,6 +107,79 @@ export default function TaskBoard() {
       description: 'Completed tasks'
     }
   ]
+
+  // Render list view
+  const renderListView = () => (
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Task
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Status
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Priority
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Due Date
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {tasks.map((task) => (
+            <tr key={task.id} className="hover:bg-gray-50">
+              <td className="px-6 py-4">
+                <div className="flex items-center">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{task.title}</div>
+                    <div className="text-sm text-gray-500">{task.project}</div>
+                  </div>
+                </div>
+              </td>
+              <td className="px-6 py-4">
+                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  task.status === 'todo' ? 'bg-gray-100 text-gray-800' :
+                  task.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                  task.status === 'review' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-green-100 text-green-800'
+                }`}>
+                  {task.status}
+                </span>
+              </td>
+              <td className="px-6 py-4">
+                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  task.priority === 'high' ? 'bg-red-100 text-red-800' :
+                  task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-green-100 text-green-800'
+                }`}>
+                  {task.priority}
+                </span>
+              </td>
+              <td className="px-6 py-4 text-sm text-gray-500">
+                {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}
+              </td>
+              <td className="px-6 py-4 text-sm font-medium">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => openEditModal(task)}
+                  className="text-purple-600 hover:text-purple-900"
+                >
+                  Edit
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
 
   if (loading) {
     return (
@@ -127,11 +208,11 @@ export default function TaskBoard() {
               <input
                 type="text"
                 placeholder="Search tasks..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
               <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="!rounded-lg">
               <Filter className="h-5 w-5" />
             </Button>
             <Button onClick={() => setIsModalOpen(true)}>
@@ -144,12 +225,12 @@ export default function TaskBoard() {
 
       {/* View Toggle */}
       <div className="flex justify-end mb-6">
-        <div className="bg-white rounded-lg shadow-sm p-1">
+        <div className="inline-flex rounded-lg shadow-sm">
           <Button
             variant={viewMode === 'board' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setViewMode('board')}
-            className="px-3"
+            className="rounded-r-none border-r"
           >
             <Columns className="h-4 w-4 mr-2" />
             Board
@@ -158,7 +239,7 @@ export default function TaskBoard() {
             variant={viewMode === 'list' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setViewMode('list')}
-            className="px-3"
+            className="rounded-l-none"
           >
             <List className="h-4 w-4 mr-2" />
             List
@@ -166,29 +247,29 @@ export default function TaskBoard() {
         </div>
       </div>
 
-      {/* Task Board */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          {columns.map(column => (
-            <TaskColumn
-              key={column.id}
-              id={column.id}
-              title={column.title}
-              icon={column.icon}
-              description={column.description}
-              tasks={tasks.filter(task => task.status === column.id)}
-              onEdit={(task) => {
-                setEditingTask(task)
-                setIsModalOpen(true)
-              }}
-              onDelete={() => {}}
-              onStartTimer={() => {}}
-            />
-          ))}
-        </div>
-      </DragDropContext>
+      {/* Content */}
+      {viewMode === 'board' ? (
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {columns.map(column => (
+              <TaskColumn
+                key={column.id}
+                id={column.id}
+                title={column.title}
+                icon={column.icon}
+                description={column.description}
+                tasks={tasks.filter(task => task.status === column.id)}
+                onEdit={openEditModal}
+                onDelete={() => {}}
+                onStartTimer={() => {}}
+              />
+            ))}
+          </div>
+        </DragDropContext>
+      ) : (
+        renderListView()
+      )}
 
-      {/* Task Modal */}
       <TaskModal
         isOpen={isModalOpen}
         onClose={() => {

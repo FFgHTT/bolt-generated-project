@@ -10,12 +10,24 @@ export function FirebaseProvider({ children }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
+    console.log('Setting up auth state listener...'); // Debug log
+    const unsubscribe = onAuthStateChanged(auth, 
+      (user) => {
+        console.log('Auth state changed:', user ? 'User logged in' : 'No user'); // Debug log
+        setUser(user);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Auth state error:', error); // Debug log
+        setError(error);
+        setLoading(false);
+      }
+    );
 
-    return unsubscribe;
+    return () => {
+      console.log('Cleaning up auth state listener...'); // Debug log
+      unsubscribe();
+    };
   }, []);
 
   const value = {

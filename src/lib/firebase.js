@@ -8,39 +8,66 @@ import {
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Replace this configuration with the one from your Firebase Console
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyDczFqfESOcXpE2oSH_Ih8lh86v7EgT6D4",
+  authDomain: "tidycal-cea20.firebaseapp.com",
+  projectId: "tidycal-cea20",
+  storageBucket: "tidycal-cea20.firebasestorage.app",
+  messagingSenderId: "87272726569",
+  appId: "1:87272726569:web:0d552876baa31c9a117c38",
+  measurementId: "G-N6E6BWSDVY"
 };
 
-// Initialize Firebase
+console.log('Initializing Firebase...'); // Debug log
+
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+export { auth, db };
 
 export const signUp = async (email, password) => {
+  console.log('Attempting signup...'); // Debug log
   try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    return result;
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    console.log('Signup successful:', userCredential); // Debug log
+    return userCredential;
   } catch (error) {
-    console.error('SignUp error:', error);
+    console.error('Signup error:', error.code, error.message); // Debug log
     throw error;
   }
 };
 
-export const signIn = (email, password) => {
-  return signInWithEmailAndPassword(auth, email, password);
+export const signIn = async (email, password) => {
+  console.log('Attempting signin...'); // Debug log
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log('Signin successful:', userCredential); // Debug log
+    return userCredential;
+  } catch (error) {
+    console.error('Signin error:', error.code, error.message); // Debug log
+    throw error;
+  }
 };
 
-export const logOut = () => {
-  return signOut(auth);
+export const logOut = async () => {
+  console.log('Attempting signout...'); // Debug log
+  try {
+    await signOut(auth);
+    console.log('Signout successful'); // Debug log
+  } catch (error) {
+    console.error('Signout error:', error.code, error.message); // Debug log
+    throw error;
+  }
 };
 
-export const resetPassword = (email) => {
-  return sendPasswordResetEmail(auth, email);
+export const resetPassword = async (email) => {
+  console.log('Attempting password reset...'); // Debug log
+  try {
+    await sendPasswordResetEmail(auth, email);
+    console.log('Password reset email sent'); // Debug log
+  } catch (error) {
+    console.error('Password reset error:', error.code, error.message); // Debug log
+    throw error;
+  }
 };

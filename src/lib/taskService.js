@@ -7,7 +7,8 @@ import {
   doc, 
   query, 
   where, 
-  getDocs 
+  getDocs,
+  orderBy 
 } from 'firebase/firestore';
 
 export const createTask = async (userId, task) => {
@@ -16,7 +17,7 @@ export const createTask = async (userId, task) => {
       ...task,
       userId,
       createdAt: new Date().toISOString(),
-      status: task.status || 'todo'
+      updatedAt: new Date().toISOString()
     });
     return { id: docRef.id, ...task };
   } catch (error) {
@@ -52,7 +53,11 @@ export const deleteTask = async (taskId) => {
 
 export const getUserTasks = async (userId) => {
   try {
-    const q = query(collection(db, 'tasks'), where('userId', '==', userId));
+    const q = query(
+      collection(db, 'tasks'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({
       id: doc.id,

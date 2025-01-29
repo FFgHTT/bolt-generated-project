@@ -18,13 +18,29 @@ export default function LoginForm({ onToggleForm, onForgotPassword }) {
     setGlobalError(null)
 
     try {
+      console.log('Submitting login form...', { email }); // Debug log
       await signIn(email, password)
+      console.log('Login successful'); // Debug log
     } catch (err) {
-      setError(
-        err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found'
-          ? 'Invalid email or password'
-          : 'An error occurred. Please try again.'
-      )
+      console.error('Login error:', err); // Debug log
+      
+      // More specific error messages
+      switch (err.code) {
+        case 'auth/invalid-email':
+          setError('Invalid email address format.');
+          break;
+        case 'auth/user-not-found':
+          setError('No account found with this email.');
+          break;
+        case 'auth/wrong-password':
+          setError('Incorrect password.');
+          break;
+        case 'auth/too-many-requests':
+          setError('Too many attempts. Please try again later.');
+          break;
+        default:
+          setError(`Error: ${err.message}`);
+      }
     } finally {
       setIsLoading(false)
     }
