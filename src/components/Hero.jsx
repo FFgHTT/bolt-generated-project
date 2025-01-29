@@ -2,7 +2,7 @@ import React from 'react'
 import { Button } from './ui/Button'
 import { ArrowRight, CheckCircle } from 'lucide-react'
 
-export default function Hero() {
+export default function Hero({ onGetStarted }) {
   return (
     <div className="relative overflow-hidden">
       {/* Background gradient */}
@@ -42,7 +42,7 @@ export default function Hero() {
               </div>
 
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left">
-                <Button size="lg" className="mr-4">
+                <Button size="lg" className="mr-4" onClick={onGetStarted}>
                   Get Started <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button variant="outline" size="lg">

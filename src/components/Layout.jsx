@@ -1,35 +1,30 @@
-import React, { useState } from 'react'
-import { Home, Folder, Clock, Settings, LogOut } from 'lucide-react'
+import React from 'react'
+import { Home, Folder, Clock, Settings, LogOut, Layout as LayoutIcon } from 'lucide-react'
 import { Button } from './ui/Button'
 import Navbar from './Navbar'
 import Dashboard from './Dashboard'
+import TaskBoard from './tasks/TaskBoard'
 import ProjectsView from './ProjectsView'
 import TimeTracking from './TimeTracking'
 import SettingsComponent from './Settings'
-import { logOut } from '../lib/firebase'
 
 export default function Layout() {
-  const [currentView, setCurrentView] = useState('dashboard')
+  const [currentView, setCurrentView] = React.useState('dashboard')
   
   const menuItems = [
     { icon: Home, label: 'Dashboard', id: 'dashboard' },
+    { icon: LayoutIcon, label: 'Tasks', id: 'tasks' },
     { icon: Folder, label: 'Projects', id: 'projects' },
     { icon: Clock, label: 'Time Tracking', id: 'time-tracking' },
     { icon: Settings, label: 'Settings', id: 'settings' }
   ]
 
-  const handleLogout = async () => {
-    try {
-      await logOut()
-    } catch (error) {
-      console.error('Error logging out:', error)
-    }
-  }
-
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard />
+        return <Dashboard onViewTasks={() => setCurrentView('tasks')} />
+      case 'tasks':
+        return <TaskBoard />
       case 'projects':
         return <ProjectsView />
       case 'time-tracking':
@@ -37,16 +32,16 @@ export default function Layout() {
       case 'settings':
         return <SettingsComponent />
       default:
-        return <Dashboard />
+        return <Dashboard onViewTasks={() => setCurrentView('tasks')} />
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Navbar currentView={currentView} setCurrentView={setCurrentView} menuItems={menuItems} />
       
       <div className="flex">
-        {/* Sidebar */}
+        {/* Sidebar - Hidden on mobile */}
         <div className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 mt-16 pt-5 bg-white border-r">
           <div className="flex-1 flex flex-col">
             <nav className="flex-1 px-4 space-y-1">
@@ -66,7 +61,7 @@ export default function Layout() {
               <Button 
                 variant="outline" 
                 className="w-full justify-start text-red-600 hover:text-red-700"
-                onClick={handleLogout}
+                onClick={() => window.location.reload()} // Temporary logout for demo
               >
                 <LogOut className="h-5 w-5 mr-3" />
                 Sign Out

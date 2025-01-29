@@ -4,7 +4,7 @@ import { Mail, Lock, Loader, AlertCircle } from 'lucide-react'
 import { signIn } from '../../lib/firebase'
 import { useFirebase } from '../../contexts/FirebaseContext'
 
-export default function LoginForm({ onToggleForm }) {
+export default function LoginForm({ onToggleForm, onForgotPassword }) {
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -89,9 +89,13 @@ export default function LoginForm({ onToggleForm }) {
         </div>
 
         <div className="text-sm">
-          <a href="#" className="font-medium text-purple-600 hover:text-purple-500">
+          <button
+            type="button"
+            onClick={onForgotPassword}
+            className="font-medium text-purple-600 hover:text-purple-500"
+          >
             Forgot password?
-          </a>
+          </button>
         </div>
       </div>
 

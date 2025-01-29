@@ -18,17 +18,36 @@ export default function SignupForm({ onToggleForm }) {
     setError('')
     setGlobalError(null)
 
+    console.log('Attempting signup with:', { email }) // Debug log
+
     try {
-      await signUp(email, password)
+      const userCredential = await signUp(email, password)
+      console.log('Signup successful:', userCredential) // Debug log
+      
       // TODO: Store additional user data (name) in Firestore
     } catch (err) {
-      setError(
-        err.code === 'auth/email-already-in-use'
-          ? 'Email already in use'
-          : err.code === 'auth/weak-password'
-          ? 'Password should be at least 6 characters'
-          : 'An error occurred. Please try again.'
-      )
+      console.error('Signup error:', err) // Debug log
+      
+      let errorMessage = 'An error occurred. Please try again.'
+      
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'This email is already registered. Please try logging in.'
+          break
+        case 'auth/invalid-email':
+          errorMessage = 'Please enter a valid email address.'
+          break
+        case 'auth/weak-password':
+          errorMessage = 'Password should be at least 6 characters long.'
+          break
+        case 'auth/operation-not-allowed':
+          errorMessage = 'Email/password registration is not enabled. Please contact support.'
+          break
+        default:
+          errorMessage = `Error: ${err.message}`
+      }
+      
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -89,12 +108,16 @@ export default function SignupForm({ onToggleForm }) {
             name="password"
             type="password"
             required
+            minLength="6"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           />
           <Lock className="h-5 w-5 text-gray-400 absolute right-3 top-2.5" />
         </div>
+        <p className="mt-1 text-sm text-gray-500">
+          Password must be at least 6 characters
+        </p>
       </div>
 
       <div>

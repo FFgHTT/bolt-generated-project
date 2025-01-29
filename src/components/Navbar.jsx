@@ -1,9 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from './ui/Button'
 import { Menu, X } from 'lucide-react'
 
-export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
+export default function Navbar({ currentView, setCurrentView, menuItems }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  const handleNavigation = (viewId) => {
+    setCurrentView(viewId)
+    setIsMenuOpen(false)
+  }
 
   return (
     <nav className="bg-white shadow-sm border-b fixed w-full top-0 z-50">
@@ -16,7 +21,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="sm:hidden flex items-center">
+          <div className="md:hidden flex items-center">
             <Button
               variant="ghost"
               size="sm"
@@ -34,16 +39,17 @@ export default function Navbar() {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="sm:hidden bg-white border-b border-gray-200">
-          <div className="pt-2 pb-3 space-y-1">
-            {['Dashboard', 'Projects', 'Time Tracking', 'Settings'].map((item) => (
+        <div className="md:hidden bg-white border-b border-gray-200">
+          <div className="pt-2 pb-3 space-y-1 px-4">
+            {menuItems.map((item) => (
               <Button
-                key={item}
-                variant="ghost"
+                key={item.id}
+                variant={currentView === item.id ? 'default' : 'ghost'}
                 className="w-full justify-start"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => handleNavigation(item.id)}
               >
-                {item}
+                <item.icon className="h-4 w-4 mr-2" />
+                {item.label}
               </Button>
             ))}
           </div>
